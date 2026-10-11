@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>עורכי ההזמנות</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#FFFFFF;--ink:#1F1F1F;--muted:#6B6460;--line:#E6E1DD;--taupe:#a98d80;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Assistant',Arial,sans-serif;line-height:1.6}
+main{max-width:760px;margin:0 auto;padding:32px 16px 48px;display:flex;flex-direction:column;gap:20px}
+img.logo{height:34px;width:auto;align-self:flex-start}
+h1{margin:0;font-size:28px;font-weight:600}
+p{margin:0;color:var(--muted)}
+section{border-top:1px solid var(--line);padding-top:14px}
+h2{margin:0 0 6px;font-size:18px;font-weight:600}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+li{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+a{color:var(--ink)}
+code{font:12.5px ui-monospace,Menlo,monospace;color:var(--muted);direction:ltr}
+.st{font-size:12px;font-weight:700;border:1px solid currentColor;padding:0 7px}
+.ready{color:#2F6B47}.demo{color:#8A6A1F}.soon{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="brand/logo.png" alt="esty &amp; gili">
+  <h1>עורכי ההזמנות</h1>
+  <p>דף פנימי לאסתי וגילי. כל עורך כאן מוטמע בתיאור של המוצר המתאים ב-Shopix</p>
+  <div id="list"></div>
+</main>
+<script src="templates.js"></script>
+<script>
+(function(){
+  const EG = window.EG, host = document.getElementById("list");
+  const ST = { ready:"מוכן", demo:"דוגמה", soon:"בקרוב" };
+  for (const [ck, C] of Object.entries(EG.categories)){
+    const sec = document.createElement("section");
+    const h = document.createElement("h2"); h.textContent = C.he; sec.appendChild(h);
+    const ul = document.createElement("ul");
+    for (const [id, S] of Object.entries(EG.styles).filter(([i,s])=>s.category===ck)){
+      const li = document.createElement("li");
+      const left = document.createElement("span");
+      if (S.backgrounds.length){ const a = document.createElement("a"); a.href = "editor.html#"+id; a.textContent = S.he; left.appendChild(a); }
+      else left.textContent = S.he;
+      const code = document.createElement("code"); code.textContent = " " + id; left.appendChild(code);
+      const st = document.createElement("span"); st.className = "st " + S.status; st.textContent = ST[S.status];
+      li.append(left, st); ul.appendChild(li);
+    }
+    sec.appendChild(ul); host.appendChild(sec);
+  }
+})();
+</script>
+</body>
+</html>

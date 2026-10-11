@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>עורך הזמנה</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bellefair&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Assistant:wght@400;500;600;700&family=Varela+Round&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Cinzel:wght@400;500&family=Italiana&family=Pinyon+Script&display=swap">
+<style>
+/* Layout: the editor that sits inside a Shopix product description. Narrow = preview on top; wide = preview beside the form. Shopix look: white, Assistant, square corners, taupe. */
+:root{ --bg:#FFFFFF; --ink:#1F1F1F; --muted:#6B6460; --line:#E6E1DD; --soft:#F6F3F1; --taupe:#a98d80; --err:#9A3B1E; color-scheme:light }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Assistant',Arial,sans-serif;font-size:15px;line-height:1.5}
+.ed{display:grid;grid-template-columns:1fr;gap:18px;padding:12px}
+@media (min-width:760px){.ed{grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:28px}.stage{position:sticky;top:12px;align-self:start}}
+.stage{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--soft);padding:16px 12px}
+.inv{position:relative;width:100%;max-width:380px;aspect-ratio:9/16;overflow:hidden;background:#F3EDE2;box-shadow:0 18px 40px -18px rgba(40,35,25,.45);user-select:none;-webkit-user-select:none}
+.stage .note{font-size:12.5px;color:var(--muted);text-align:center;max-width:380px;margin:0}
+.form{display:flex;flex-direction:column;gap:18px;min-width:0}
+.step{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.step:first-child{border-top:0;padding-top:0}
+.step h2{margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:12px}
+.bgs{display:flex;gap:6px;flex-wrap:wrap}
+.bgs button{font:inherit;font-size:12.5px;width:66px;padding:0;border:1px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.bgs img{width:64px;height:114px;object-fit:cover;display:block}
+.bgs button span{padding:2px 0}
+.bgs button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+.seg{display:inline-flex;border:1px solid var(--line);align-self:flex-start}
+.seg button{font:inherit;border:0;background:var(--bg);color:var(--muted);padding:6px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+fieldset{border:0;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+fieldset legend{font-size:12.5px;font-weight:700;color:var(--ink);padding:0;margin-bottom:6px;grid-column:1/-1;letter-spacing:.03em}
+@media (max-width:520px){fieldset{grid-template-columns:1fr}}
+.groups{display:flex;flex-direction:column;gap:16px}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.f.wide{grid-column:1/-1}
+.f label{font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.f label .opt,.f label .cnt{color:var(--muted);font-weight:400}
+.f label .cnt{font-variant-numeric:tabular-nums;direction:ltr}
+.f input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);padding:8px 10px;width:100%;border-radius:0}
+.f.err input{border-color:var(--err)}
+.f .msg{font-size:12.5px;color:var(--err)}
+.f .msg:empty{display:none}
+.f .help{font-size:12px;color:var(--muted)}
+.gender{display:flex;border:1px solid var(--line)}
+.gender button{flex:1;font:inherit;border:0;background:var(--bg);color:var(--muted);padding:8px 6px;cursor:pointer}
+.gender button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.confirm{display:flex;gap:8px;align-items:center;font-size:14px}
+.confirm input{width:17px;height:17px;accent-color:#1F1F1F}
+.btn{font:inherit;font-weight:700;font-size:15.5px;border:0;background:var(--taupe);color:#FFFFFF;padding:13px 20px;cursor:pointer;width:100%}
+.fine{margin:0;font-size:12.5px;color:var(--muted)}
+.formmsg{margin:0;font-size:13px;color:var(--err)}
+.formmsg:empty{display:none}
+#summary{font:13px/1.5 'Assistant',Arial,sans-serif;width:100%;border:1px solid var(--line);padding:8px 10px;resize:vertical;color:var(--ink);background:var(--bg)}
+.soon{padding:40px 16px;text-align:center;color:var(--muted)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--taupe);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app" class="ed">
+  <div class="stage">
+    <div class="inv" id="inv" aria-label="תצוגה חיה של ההזמנה"></div>
+    <p class="note" id="note">ההזמנה משתנה בזמן שאת מקלידה. זו תצוגה מוקטנת עם סימן מים, והקובץ הנקי נשלח אחרי התשלום</p>
+  </div>
+  <form class="form" id="form" novalidate>
+    <section class="step"><h2><span class="num">1</span><span id="h-bg">בוחרים רקע</span></h2><div class="bgs" id="bgs" role="group" aria-label="רקע"></div></section>
+    <section class="step"><h2><span class="num">2</span><span id="h-lang">שפת ההזמנה</span></h2>
+      <div class="seg" role="group" aria-label="שפה"><button type="button" id="lang-he" aria-pressed="true">עברית</button><button type="button" id="lang-en" aria-pressed="false">English</button></div>
+    </section>
+    <section class="step"><h2><span class="num">3</span><span id="h-fields">ממלאים את הפרטים</span></h2><div class="groups" id="fields"></div></section>
+    <section class="step">
+      <p class="formmsg" id="formmsg"></p>
+      <label class="confirm"><input type="checkbox" id="confirm"> <span id="confirm-t">בדקתי את השמות, התאריך והשעות</span></label>
+      <button class="btn" id="copy" type="button">העתקת הפרטים להזמנה</button>
+      <textarea id="summary" readonly rows="5" hidden aria-label="פרטי ההזמנה להעתקה"></textarea>
+      <p class="fine" id="hint">אחרי ההעתקה מדביקים בשדה "פרטי ההזמנה" שליד המחיר, ולוחצים "הוספה לסל"</p>
+    </section>
+  </form>
+</div>
+<div id="soon" class="soon" hidden>הסגנון הזה עוד בעבודה. הרקעים שלו יעלו בקרוב</div>
+
+<script src="templates.js"></script>
+<script src="engine.js"></script>
+<script>
+(function(){
+  const EG = window.EG, E = window.EGEngine;
+  const $ = s => document.querySelector(s);
+  const UI = {
+    he:{ bg:"בוחרים רקע", lang:"שפת ההזמנה", fields:"ממלאים את הפרטים", opt:"רשות", req:"שדה חובה", long:"ארוך מדי לעיצוב. כדאי לקצר",
+         zone:"יש יותר מדי טקסט לעיצוב הזה. כדאי לקצר שמות, מקום או שורות רשות", confirm:"בדקתי את השמות, התאריך והשעות",
+         copy:"העתקת הפרטים להזמנה", copied:"הועתק ✓", select:"סמנו והעתיקו את הטקסט", needConfirm:"רגע לפני: סמני שבדקת את הפרטים",
+         hint:"אחרי ההעתקה מדביקים בשדה \"פרטי ההזמנה\" שליד המחיר, ולוחצים \"הוספה לסל\"",
+         note:"ההזמנה משתנה בזמן שאת מקלידה. זו תצוגה מוקטנת עם סימן מים, והקובץ הנקי נשלח אחרי התשלום" },
+    en:{ bg:"Choose a background", lang:"Language", fields:"Fill in the details", opt:"optional", req:"Required", long:"Too long for this design. Please shorten it",
+         zone:"There is too much text for this design. Please shorten names, venue or optional lines", confirm:"I checked the names, date and times",
+         copy:"Copy details to order", copied:"Copied ✓", select:"Select and copy the text", needConfirm:"Please confirm you checked the details",
+         hint:"After copying, paste into \"פרטי ההזמנה\" next to the price, then add to cart",
+         note:"The invitation updates as you type. This is a small watermarked preview; the clean file is sent after payment" }
+  };
+  let styleId, cat, lang = "he", bgKey, data = {}, hebEdited = false;
+
+  function pickStyle(){
+    const id = (location.hash || "").slice(1);
+    styleId = EG.styles[id] ? id : "wed-watercolor";
+    const st = EG.styles[styleId];
+    const usable = st.backgrounds && st.backgrounds.length;
+    $("#app").hidden = !usable; $("#soon").hidden = !!usable;
+    if (!usable) return false;
+    cat = EG.categories[st.category];
+    bgKey = st.backgrounds[0];
+    lang = "he"; data = E.demo(styleId, lang); hebEdited = false;
+    return true;
+  }
+
+  function buildBgs(){
+    const host = $("#bgs"); host.innerHTML = "";
+    for (const k of EG.styles[styleId].backgrounds){
+      const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", k===bgKey);
+      const im = document.createElement("img"); im.src = EG.backgrounds[k].file; im.alt = "";
+      const s = document.createElement("span"); s.textContent = EG.backgrounds[k][lang];
+      b.append(im, s); b.addEventListener("click", ()=>{ bgKey = k; buildBgs(); render(); });
+      host.appendChild(b);
+    }
+  }
+
+  function buildForm(){
+    const u = UI[lang], host = $("#fields"); host.innerHTML = "";
+    for (const g of Object.keys(cat.groups)){
+      const fs = document.createElement("fieldset");
+      const lg = document.createElement("legend"); lg.textContent = cat.groups[g][lang]; fs.appendChild(lg);
+      for (const f of cat.fields.filter(x=>x.group===g)){
+        if (f.heOnly && lang!=="he") continue;
+        const w = document.createElement("div"); w.className = "f" + (f.wide || f.type==="gender" ? " wide" : ""); w.id = "w-"+f.k;
+        const lab = document.createElement("label"); lab.htmlFor = "in-"+f.k;
+        const t = document.createElement("span"); t.textContent = f[lang];
+        if (!f.req){ const o = document.createElement("span"); o.className = "opt"; o.textContent = " · "+u.opt; t.appendChild(o); }
+        lab.appendChild(t);
+        if (f.max){ const cnt = document.createElement("span"); cnt.className = "cnt"; cnt.id = "c-"+f.k; lab.appendChild(cnt); }
+        w.appendChild(lab);
+        if (f.type==="gender"){
+          const box = document.createElement("div"); box.className = "gender"; box.id = "in-"+f.k; box.setAttribute("role","group");
+          for (const [val,o] of Object.entries(f.options)){
+            const b = document.createElement("button"); b.type = "button"; b.textContent = o[lang]; b.setAttribute("aria-pressed", data[f.k]===val);
+            b.addEventListener("click", ()=>{ data[f.k] = val; [...box.children].forEach(x=>x.setAttribute("aria-pressed", x===b)); render(); });
+            box.appendChild(b);
+          }
+          w.appendChild(box);
+        } else {
+          const inp = document.createElement("input");
+          inp.id = "in-"+f.k; inp.type = f.type || "text"; inp.autocomplete = "off";
+          if (f.max) inp.maxLength = f.max;
+          if (f.type==="number"){ inp.min = f.min || 1; inp.max = f.max2 || 120; inp.inputMode = "numeric"; }
+          if (!f.type) inp.dir = "auto";
+          inp.value = data[f.k] || "";
+          inp.addEventListener("input", ()=>{
+            data[f.k] = inp.value;
+            if (f.auto==="hebdate") hebEdited = true;
+            if (f.type==="date" && !hebEdited && lang==="he"){ data.hebdate = E.hebrewDate(inp.value); const h = $("#in-hebdate"); if (h) h.value = data.hebdate; }
+            render();
+          });
+          w.appendChild(inp);
+        }
+        const help = f.help ? f.help[lang] : (f.auto==="hebdate" ? (lang==="he" ? "מתמלא לבד מהתאריך. אפשר לשנות, למשל לאירוע אחרי השקיעה" : "") : "");
+        if (help){ const h = document.createElement("div"); h.className = "help"; h.textContent = help; w.appendChild(h); }
+        const m = document.createElement("div"); m.className = "msg"; m.id = "m-"+f.k; w.appendChild(m);
+        fs.appendChild(w);
+      }
+      host.appendChild(fs);
+    }
+    $("#h-bg").textContent = u.bg; $("#h-lang").textContent = u.lang; $("#h-fields").textContent = u.fields;
+    $("#confirm-t").textContent = u.confirm; $("#copy").textContent = u.copy; $("#hint").textContent = u.hint; $("#note").textContent = u.note;
+    $("#form").dir = lang==="he" ? "rtl" : "ltr";
+  }
+
+  function render(){
+    const res = E.render($("#inv"), styleId, bgKey, data, lang);
+    const u = UI[lang];
+    for (const f of cat.fields){
+      const w = $("#w-"+f.k); if (!w) continue;
+      const empty = !E.clean(data[f.k]);
+      const msg = res.problems[f.k] ? u.long : (f.req && empty ? u.req : "");
+      w.classList.toggle("err", !!msg); $("#m-"+f.k).textContent = msg;
+      const cnt = $("#c-"+f.k); if (cnt) cnt.textContent = `${(data[f.k]||"").length}/${f.max}`;
+    }
+    $("#formmsg").textContent = res.overflow ? u.zone : "";
+    $("#copy").disabled = !!document.querySelector(".f.err") || res.overflow;
+    $("#copy").style.opacity = $("#copy").disabled ? .45 : 1;
+  }
+
+  function setLang(l){
+    lang = l; data = E.demo(styleId, l); hebEdited = false;
+    $("#lang-he").setAttribute("aria-pressed", l==="he"); $("#lang-en").setAttribute("aria-pressed", l==="en");
+    buildBgs(); buildForm(); render(); $("#summary").hidden = true;
+  }
+  $("#lang-he").addEventListener("click", ()=>setLang("he"));
+  $("#lang-en").addEventListener("click", ()=>setLang("en"));
+  $("#form").addEventListener("submit", e=>e.preventDefault());
+  $("#copy").addEventListener("click", async ()=>{
+    const u = UI[lang];
+    if (!$("#confirm").checked){ $("#formmsg").textContent = u.needConfirm; return; }
+    const t = E.summary(styleId, bgKey, data, lang), ta = $("#summary");
+    ta.value = t; ta.hidden = false;
+    let ok = false;
+    try{ await navigator.clipboard.writeText(t); ok = true; }catch(e){ ta.focus(); ta.select(); }
+    $("#copy").textContent = ok ? u.copied : u.select;
+    setTimeout(()=>$("#copy").textContent = u.copy, 2200);
+  });
+
+  function boot(){ if (pickStyle()){ setLang("he"); } }
+  window.addEventListener("hashchange", boot);
+  let rt; window.addEventListener("resize", ()=>{ clearTimeout(rt); rt = setTimeout(()=>{ if (cat) render(); }, 120); });
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(boot);
+  boot();
+})();
+</script>
+</body>
+</html>
