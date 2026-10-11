@@ -91,6 +91,7 @@ window.EGEngine = (function(EG){
     box.appendChild(block);
     const problems = {}, lineEls = [];
     const items = cat.compose(d, lang, H);
+    if (lang==="he" && d.bsd === true) items.unshift({ s:"bsd", text:"בס״ד", gap:"m" });
     for (const it of items){
       const st = EG.lines[it.s];
       let el;
@@ -138,7 +139,7 @@ window.EGEngine = (function(EG){
         applyLine(el, it.s, st, style, lang, scale, st.size[0]*fac);
         if (!fit([el], st, scale, fac) && it.key) problems[it.key] = true;
       }
-      if (it.gap) el.style.marginBottom = (EG.gap[it.gap]*W/100*Math.max(fac,0.85))+"px";
+      if (it.gap) el.style.marginBottom = (EG.gap[it.gap]*W/100*Math.max(fac,0.7))+"px";
       lineEls.push(el);
     }
     const zoneTop = Z.top/100*Hh, zoneH = (Z.bottom - Z.top)/100*Hh, bh = block.offsetHeight;
@@ -161,7 +162,7 @@ window.EGEngine = (function(EG){
   function render(box, styleId, bgKey, d, lang, opts={}){
     box.style.position = box.style.position || "relative";
     let res;
-    for (let f = 1; f >= 0.7; f -= 0.03){ res = renderOnce(box, styleId, bgKey, d, lang, opts, f); if (!res.overflow) break; }
+    for (let f = 1; f >= 0.6; f -= 0.03){ res = renderOnce(box, styleId, bgKey, d, lang, opts, f); if (!res.overflow) break; }
     return res;
   }
 
@@ -181,6 +182,7 @@ window.EGEngine = (function(EG){
       if (f.heOnly && !he) continue;
       let v = d[f.k];
       if (f.type==="gender") v = f.options[v] ? f.options[v][he?"he":"en"] : "";
+      if (f.type==="toggle") v = v === true ? (he ? "כן" : "yes") : "";
       if (f.type==="date") v = fmtDate(v);
       v = clean(v);
       if (v) rows.push([f[he?"he":"en"], v]);

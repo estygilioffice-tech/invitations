@@ -48,6 +48,12 @@ fieldset legend{font-size:12.5px;font-weight:700;color:var(--ink);padding:0;marg
 .gender{display:flex;border:1px solid var(--line)}
 .gender button{flex:1;font:inherit;border:0;background:var(--bg);color:var(--muted);padding:8px 6px;cursor:pointer}
 .gender button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.preset{display:flex;flex-direction:column;gap:6px}
+.preset .chips{display:flex;flex-wrap:wrap;gap:6px}
+.preset .chips button{font:inherit;font-size:13px;text-align:start;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:5px 10px;cursor:pointer;line-height:1.35;max-width:100%}
+.preset .chips button[aria-pressed="true"]{border-color:var(--ink);background:var(--soft);font-weight:600}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600}
+.toggle input{width:17px;height:17px;accent-color:#1F1F1F}
 .confirm{display:flex;gap:8px;align-items:center;font-size:14px}
 .confirm input{width:17px;height:17px;accent-color:#1F1F1F}
 .btn{font:inherit;font-weight:700;font-size:15.5px;border:0;background:var(--taupe);color:#FFFFFF;padding:13px 20px;cursor:pointer;width:100%}
@@ -140,7 +146,31 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
         lab.appendChild(t);
         if (f.max){ const cnt = document.createElement("span"); cnt.className = "cnt"; cnt.id = "c-"+f.k; lab.appendChild(cnt); }
         w.appendChild(lab);
-        if (f.type==="gender"){
+        if (f.type==="toggle"){
+          w.innerHTML = "";
+          const lab2 = document.createElement("label"); lab2.className = "toggle";
+          const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "in-"+f.k; cb.checked = data[f.k] === true;
+          cb.addEventListener("change", ()=>{ data[f.k] = cb.checked; render(); });
+          lab2.append(cb, document.createTextNode(" " + f[lang]));
+          w.appendChild(lab2);
+          fs.appendChild(w);
+          continue;
+        }
+        if (f.type==="preset"){
+          const box = document.createElement("div"); box.className = "preset";
+          const chips = document.createElement("div"); chips.className = "chips"; chips.setAttribute("role","group");
+          const list = (f.presets && f.presets[lang]) || [];
+          const inp = document.createElement("input"); inp.type = "text"; inp.id = "in-"+f.k; inp.dir = "auto"; inp.maxLength = f.max; inp.autocomplete = "off";
+          inp.placeholder = lang==="he" ? "או כתבי משפט משלך" : "or write your own line";
+          inp.value = data[f.k] || "";
+          const mark = () => [...chips.children].forEach(x=>x.setAttribute("aria-pressed", x.dataset.v === (data[f.k]||"")));
+          const add = (label, val) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.dataset.v = val;
+            b.addEventListener("click", ()=>{ data[f.k] = val; inp.value = val; mark(); render(); }); chips.appendChild(b); };
+          list.forEach(t=>add(t, t));
+          add(lang==="he" ? "בלי" : "None", "");
+          inp.addEventListener("input", ()=>{ data[f.k] = inp.value; mark(); render(); });
+          box.append(chips, inp); w.appendChild(box); mark();
+        } else if (f.type==="gender"){
           const box = document.createElement("div"); box.className = "gender"; box.id = "in-"+f.k; box.setAttribute("role","group");
           for (const [val,o] of Object.entries(f.options)){
             const b = document.createElement("button"); b.type = "button"; b.textContent = o[lang]; b.setAttribute("aria-pressed", data[f.k]===val);
